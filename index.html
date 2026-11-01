@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A project plan exploring PAC learning: the framework, finite hypothesis classes, proofs, sample complexity, and computational efficiency.">
+  <meta name="theme-color" content="#244c43">
+  <title>PAC Learning | Computational Learning Theory</title>
+  <style>
+    :root { --paper:#f8f7f2; --ink:#202c28; --muted:#53635b; --green:#244c43; --line:#d6dcd3; --tint:#e9eee5; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; scroll-padding-top:24px; }
+    body { margin:0; background:var(--paper); color:var(--ink); font:17px/1.7 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    a { color:var(--green); text-underline-offset:4px; }
+    a:hover { text-decoration-thickness:2px; }
+    a:focus-visible { outline:3px solid var(--green); outline-offset:5px; }
+    .skip { position:absolute; top:-100px; left:20px; padding:10px 18px; background:white; z-index:2; }
+    .skip:focus { top:10px; }
+    .wrap { width:min(1080px,calc(100% - 80px)); margin:auto; }
+    .topbar { display:flex; justify-content:space-between; gap:20px; align-items:center; padding:25px 0; border-bottom:1px solid var(--line); font-size:13px; }
+    .brand { letter-spacing:.12em; text-transform:uppercase; font-weight:700; }
+    .topbar a { text-decoration:none; }
+    .eyebrow { font-size:12px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--green); }
+    header { padding:66px 0 48px; }
+    h1,h2,h3 { line-height:1.17; }
+    h1 { font-family:Georgia,"Times New Roman",serif; font-size:clamp(60px,9vw,104px); font-weight:400; letter-spacing:-.055em; margin:14px 0 12px; }
+    .subtitle { font-family:Georgia,"Times New Roman",serif; font-size:clamp(23px,3.4vw,33px); margin:0 0 22px; }
+    .lede { max-width:690px; color:var(--muted); font-size:19px; margin:0; }
+    .intro { background:var(--tint); padding:28px 32px; border-left:3px solid var(--green); margin:0 0 56px; }
+    .intro h2 { font:400 24px/1.3 Georgia,"Times New Roman",serif; margin:0 0 10px; }
+    .intro p { margin:0; max-width:880px; }
+    .intro p+p { margin-top:12px; }
+    .layout { display:grid; grid-template-columns:215px minmax(0,1fr); gap:70px; }
+    .contents { align-self:start; position:sticky; top:25px; padding-bottom:30px; }
+    .contents h2 { font-size:12px; text-transform:uppercase; letter-spacing:.14em; margin:0 0 20px; }
+    .contents ol { list-style:none; padding:0; margin:0; }
+    .contents li { margin:0 0 12px; font-size:14px; line-height:1.5; }
+    .contents a { text-decoration:none; display:block; }
+    .contents a:hover { text-decoration:underline; }
+    .contents span { font-size:11px; color:var(--muted); padding-right:9px; font-variant-numeric:tabular-nums; }
+    .section-heading { display:flex; justify-content:space-between; align-items:baseline; gap:16px; padding-bottom:20px; border-bottom:1px solid var(--line); }
+    .section-heading h2 { margin:0; font:400 32px/1.2 Georgia,"Times New Roman",serif; }
+    .section-heading p { margin:0; font-size:12px; color:var(--muted); white-space:nowrap; }
+    .outline { list-style:none; margin:0; padding:0; counter-reset:section; }
+    .outline>li { counter-increment:section; padding:30px 0; border-bottom:1px solid var(--line); display:grid; grid-template-columns:34px minmax(0,1fr); gap:15px; }
+    .outline>li::before { content:counter(section,decimal-leading-zero); padding-top:4px; font-size:12px; color:var(--green); font-weight:700; }
+    h3 { font-size:21px; letter-spacing:-.025em; margin:0 0 11px; font-weight:650; }
+    .outline p { margin:0; color:var(--muted); }
+    .optional { display:inline-block; vertical-align:middle; margin:6px 0 0 8px; font:600 10px/1.5 system-ui,sans-serif; letter-spacing:.07em; text-transform:uppercase; padding:3px 7px; background:var(--tint); color:var(--green); border-radius:3px; }
+    .references { list-style:none; padding:0; margin:18px 0 0; font-size:15px; }
+    .references li { margin:0 0 13px; }
+    .references small { display:block; color:var(--muted); font-size:13px; }
+    footer { margin-top:55px; padding:23px 0 32px; border-top:1px solid var(--line); display:flex; justify-content:space-between; gap:20px; color:var(--muted); font-size:12px; }
+    @media(max-width:760px) {
+      .wrap { width:calc(100% - 40px); }
+      .topbar { align-items:flex-start; font-size:11px; }
+      header { padding:44px 0 32px; }
+      .intro { padding:23px; margin-bottom:36px; }
+      .layout { display:block; }
+      .contents { position:static; border-bottom:1px solid var(--line); margin-bottom:30px; padding-bottom:18px; }
+      .contents ol { display:grid; grid-template-columns:1fr 1fr; gap:0 16px; }
+      .section-heading { display:block; }
+      .section-heading p { margin-top:10px; }
+      .outline>li { gap:9px; padding:25px 0; }
+      h3 { font-size:20px; }
+      footer { margin-top:35px; }
+    }
+    @media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } }
+    @media print { .skip,.contents,.topbar a,footer a { display:none; } .wrap { width:100%; } .layout { display:block; } header { padding:20px 0; } .intro { margin-bottom:25px; } .outline>li { break-inside:avoid; } }
+  </style>
+</head>
+<body id="top">
+  <a class="skip" href="#outline">Skip to the proposed outline</a>
+  <div class="wrap">
+    <nav class="topbar" aria-label="Main navigation">
+      <span class="brand">Computational Learning Theory</span>
+      <a href="#outline">Project outline ↗</a>
+    </nav>
+    <header>
+      <div class="eyebrow">Project proposal</div>
+      <h1>PAC Learning</h1>
+      <p class="subtitle">Probably Approximately Correct learning</p>
+      <p class="lede">How can a learner use a finite amount of data to make reliable predictions on examples it has never seen?</p>
+    </header>
+    <section class="intro" aria-labelledby="motivation-heading">
+      <h2 id="motivation-heading">Why I chose this topic</h2>
+      <p>I encountered PAC learning in previous machine learning and reinforcement learning coursework, but did not explore it in depth because it was not the main focus. This project gives me an opportunity to build on that familiarity and develop a clearer understanding of the framework and its guarantees.</p>
+      <p>My topic remains the same as in my initial proposal. The plan below develops it into a sequence of website sections, with finite hypothesis classes as the main focus and VC dimension as a possible extension.</p>
+    </section>
+    <main class="layout">
+      <nav class="contents" aria-label="Outline sections">
+        <h2>On this page</h2>
+        <ol>
+          <li><a href="#introduction"><span>01</span>Motivation</a></li>
+          <li><a href="#framework"><span>02</span>The PAC framework</a></li>
+          <li><a href="#theorem"><span>03</span>Finite-class theorem</a></li>
+          <li><a href="#proof"><span>04</span>Proof walkthrough</a></li>
+          <li><a href="#example"><span>05</span>Example &amp; sample size</a></li>
+          <li><a href="#computation"><span>06</span>Computational complexity</a></li>
+          <li><a href="#vc-dimension"><span>07</span>VC dimension</a></li>
+          <li><a href="#resources"><span>08</span>Conclusion &amp; resources</a></li>
+        </ol>
+      </nav>
+      <section id="outline" aria-labelledby="outline-heading">
+        <div class="section-heading">
+          <h2 id="outline-heading">Proposed website outline</h2>
+          <p>Planned sections, in order</p>
+        </div>
+        <ol class="outline">
+          <li id="introduction"><div>
+            <h3>Introduction and motivation</h3>
+            <p>I will introduce the problem of generalization: why performing well on training data does not by itself explain performance on unseen data. I will explain what PAC learning aims to formalize and why guarantees about accuracy, confidence, and the amount of data are useful.</p>
+          </div></li>
+          <li id="framework"><div>
+            <h3>The PAC learning framework</h3>
+            <p>I will define the instance space, target concept, hypothesis class, and true versus training error. I will explain the accuracy parameter ε and failure probability δ, along with the assumptions of independent, identically distributed samples from an unknown distribution and realizability for the main result.</p>
+          </div></li>
+          <li id="theorem"><div>
+            <h3>PAC learning with a finite hypothesis class</h3>
+            <p>I will state the finite-class PAC guarantee in the realizable setting for a learner that returns a hypothesis consistent with the training data. I will explain how the sufficient sample size depends on the size of the hypothesis class, the desired accuracy, and the desired confidence, and clarify the assumptions under which the guarantee holds.</p>
+          </div></li>
+          <li id="proof"><div>
+            <h3>A step-by-step proof</h3>
+            <p>I will first bound the probability that a single hypothesis with true error greater than ε remains consistent with every training example. I will then use a union bound over the finite hypothesis class and rearrange the result to obtain a sufficient sample size, explaining the intuition behind each step.</p>
+          </div></li>
+          <li id="example"><div>
+            <h3>A worked example and sample complexity</h3>
+            <p>I will apply the theorem to threshold classifiers on a finite, ordered domain, where the hypothesis class can be listed explicitly. I will choose values for ε and δ, calculate the resulting sample bound, and compare how the bound changes with accuracy, confidence, and class size. I will distinguish this sufficient bound from the smallest sample size that might work in practice.</p>
+          </div></li>
+          <li id="computation"><div>
+            <h3>Computational complexity and efficient learning</h3>
+            <p>I will distinguish the number of examples needed from the time needed to find and evaluate a suitable hypothesis. Using the finite-class example, I will examine the cost of searching for a consistent hypothesis and discuss the polynomial-time requirements of efficient PAC learning. This section will explain why a sample guarantee alone does not establish an efficient algorithm.</p>
+          </div></li>
+          <li id="vc-dimension"><div>
+            <h3>Beyond finite classes: VC dimension <span class="optional">Optional extension</span></h3>
+            <p>If time permits, I will introduce shattering and VC dimension as a way to describe the capacity of a hypothesis class without simply counting its elements. I will use thresholds on the real line as a simple example and explain how this motivates studying sample complexity for infinite hypothesis classes.</p>
+          </div></li>
+          <li id="resources"><div>
+            <h3>Conclusion and references</h3>
+            <p>I will summarize what the PAC framework tells us about learning from finite data and revisit the distinction between statistical and computational requirements. I will collect references here and cite the sources used for definitions, theorem statements, and proofs throughout the completed website.</p>
+            <ul class="references" aria-label="Planned resources">
+              <li><strong>10-403 course slides</strong><small>Deep Reinforcement Learning — planned course reference.</small></li>
+              <li><strong>10-701 course materials</strong><small>Introduction to Machine Learning — planned course reference.</small></li>
+              <li><a href="https://www.geeksforgeeks.org/machine-learning/understanding-pac-learning-theoretical-foundations-and-practical-applications-in-machine-learning/">GeeksforGeeks: Understanding PAC Learning</a><small>Supplementary overview from my initial proposal; formal statements will be checked against course materials and textbook references.</small></li>
+            </ul>
+          </div></li>
+        </ol>
+      </section>
+    </main>
+    <footer><span>PAC Learning · Project plan</span><a href="#top">Back to top ↑</a></footer>
+  </div>
+</body>
+</html>
